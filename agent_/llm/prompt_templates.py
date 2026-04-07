@@ -1,3 +1,6 @@
+# プロンプトテンプレート
+
+
 ZERO_SHOT_PROMPT = """
 You are a clinical geneticist.
 Given patient phenotype information, output the top 5 likely diagnoses.

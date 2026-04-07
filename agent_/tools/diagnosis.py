@@ -38,7 +38,7 @@ def _fmt_web(results):
         return "No web results"
     return "\n".join([f"- {x.get('title', '')}" for x in results])
 
-
+# 
 def create_diagnosis(state):
     llm = state.get("llm")
     if not llm:
