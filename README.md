@@ -3,29 +3,29 @@
 ```mermaid
 graph TD
     %% 実行の起点
-    Client[外部呼び出し元] -->|インスタンス化 & run()実行| Pipeline[agent_/pipeline.py]
+    Client["外部呼び出し元"] -->|インスタンス化 & run()実行| Pipeline["agent_/pipeline.py"]
 
     %% pipeline.py が統合する要素
-    Pipeline -->|グラフ構造の定義を読み込む| GraphSpec[agent_/graph_spec.py]
-    Pipeline -->|処理ノードの登録| Nodes[agent_/nodes.py]
-    Pipeline -->|LLMインスタンスの生成| LLM[agent_/llm/azure_llm_instance.py]
-    Pipeline -->|設定の読み込み| Config[agent_/config.py]
+    Pipeline -->|"グラフ構造の定義を読み込む"| GraphSpec["agent_/graph_spec.py"]
+    Pipeline -->|"処理ノードの登録"| Nodes["agent_/nodes.py"]
+    Pipeline -->|"LLMインスタンスの生成"| LLM["agent_/llm/azure_llm_instance.py"]
+    Pipeline -->|"設定の読み込み"| Config["agent_/config.py"]
 
-    %% nodes.py の依存先（中継役から実処理へ）
-    Nodes -->|State型の参照| StateTypes[agent_/state_types.py]
-    Nodes -->|外部API・LLM推論の実行を委譲| Tools[(agent_/tools/ 以下の各処理)]
+    %% nodes.py の依存先
+    Nodes -->|"State型の参照"| StateTypes["agent_/state_types.py"]
+    Nodes -->|"外部API・LLM推論の実行を委譲"| Tools["agent_/tools/ 以下の各処理"]
 
     %% tools 配下の詳細
-    Tools -.-> PCF[pcf_api.py: API通信]
-    Tools -.-> Gestalt[gestalt_matcher.py: 画像解析]
-    Tools -.-> ZeroShot[zero_shot.py: LLM初期推論]
-    Tools -.-> Diagnosis[diagnosis.py: LLM統合推論]
-    Tools -.-> Reflection[reflection.py: LLM自己評価]
-    Tools -.-> Normalize[disease_normalize.py: ID整形]
+    Tools -.-> PCF["pcf_api.py: API通信"]
+    Tools -.-> Gestalt["gestalt_matcher.py: 画像解析"]
+    Tools -.-> ZeroShot["zero_shot.py: LLM初期推論"]
+    Tools -.-> Diagnosis["diagnosis.py: LLM統合推論"]
+    Tools -.-> Reflection["reflection.py: LLM自己評価"]
+    Tools -.-> Normalize["disease_normalize.py: ID整形"]
 
     %% データ構造
-    StateTypes -->|型定義を依存| Models[agent_/models.py]
-    Tools -->|型定義を依存| Models
+    StateTypes -->|"型定義を依存"| Models["agent_/models.py"]
+    Tools -->|"型定義を依存"| Models
 ```
 
 ## 1. コアエンジン (agent_/pipeline.py)
