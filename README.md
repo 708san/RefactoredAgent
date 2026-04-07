@@ -3,7 +3,7 @@
 ```mermaid
 graph TD
     %% 実行の起点
-    Client["外部呼び出し元"] -->|インスタンス化 & run()実行| Pipeline["agent_/pipeline.py"]
+    Client["外部呼び出し元"] -->|インスタンス化、実行| Pipeline["agent_/pipeline.py"]
 
     %% pipeline.py が統合する要素
     Pipeline -->|"グラフ構造の定義を読み込む"| GraphSpec["agent_/graph_spec.py"]
