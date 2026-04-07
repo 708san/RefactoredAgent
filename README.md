@@ -1,5 +1,5 @@
 # RefactoredAgent
-
+## 呼び出し関係
 ```mermaid
 graph TD
     %% 実行の起点
@@ -26,6 +26,51 @@ graph TD
     %% データ構造
     StateTypes -->|"型定義を依存"| Models["agent_/models.py"]
     Tools -->|"型定義を依存"| Models
+```
+## フロー
+
+```mermaid
+graph TD
+    START((START)) --> begin_flow
+    
+    %% 【フェーズ1：並列データ収集】
+    begin_flow --> pcf[PubCaseFinder検索]
+    begin_flow --> create_hpo_dict[陽性所見の辞書化]
+    begin_flow --> gestalt[GestaltMatcher顔画像解析]
+    begin_flow --> create_absent_hpo_dict[陰性所見の辞書化]
+    
+    pcf --> normalize_pcf[PCF結果のID正規化]
+    gestalt --> normalize_gestalt[Gestalt結果のID正規化]
+    
+    %% 【フェーズ2：中間推論と検索】
+    create_hpo_dict --> create_zero_shot[事前情報のみでのLLM推論]
+    create_absent_hpo_dict --> create_zero_shot
+    create_zero_shot --> normalize_zero_shot[ゼロショット結果のID正規化]
+    
+    create_hpo_dict --> hpo_web_search[HPOのWeb検索]
+    create_hpo_dict --> disease_search_with_hpo[疾患DBの検索]
+    
+    %% 【フェーズ3：結果統合と暫定診断】
+    %% 5つの並列処理結果がすべて揃うまで待機する
+    normalize_zero_shot --> create_diagnosis
+    normalize_pcf --> create_diagnosis
+    normalize_gestalt --> create_diagnosis
+    hpo_web_search --> create_diagnosis
+    disease_search_with_hpo --> create_diagnosis
+    
+    create_diagnosis[すべての結果を統合した暫定診断の生成] --> normalize_tentative_diagnosis[暫定診断結果のID正規化]
+    normalize_tentative_diagnosis --> disease_search[疾患詳細情報の追加検索]
+    
+    %% 【フェーズ4：リフレクション（自己評価）】
+    disease_search --> reflection[LLMによる暫定診断の妥当性検証]
+    
+    %% 【フェーズ5：分岐と最終出力】
+    %% graph_spec.py の route_after_reflection による条件分岐
+    reflection -->|1つでも妥当な推論あり\nまたは最大ループ回到達| final_diagnosis[リフレクション結果を踏まえた最終診断]
+    reflection -->|すべて不当\nかつ最大ループ未満| begin_flow
+    
+    final_diagnosis --> normalize_final_diagnosis[最終出力のID正規化]
+    normalize_final_diagnosis --> END((END))
 ```
 
 ## 1. コアエンジン (agent_/pipeline.py)
